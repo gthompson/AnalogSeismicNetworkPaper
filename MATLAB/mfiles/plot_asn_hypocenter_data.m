@@ -53,11 +53,12 @@ cobj=Catalog(datenum(tbl.otime), tbl.lon, tbl.lat, tbl.depth, tbl.mag)
 cobj.plot_time()
 cobj.plot()
 open contourmap_ASN_sites.fig
+hold on
 j = jet(255);
 c=1+round(254*(cobj.otime - min(cobj.otime))/(max(cobj.otime)-min(cobj.otime)) )
 scatter(-cobj.lon, cobj.lat, 20*(cobj.mag+1.5), j(c,:))
 saveas(gcf,'asn_epicenters.eps','epsc')
-saveas(9,'asn_depthmag_vs_time.eps','epsc')
+saveas(3,'asn_depthmag_vs_time.eps','epsc')
 saveas(2,'asn_depthmag_vs_time.eps','epsc')
 saveas(2,'asn_depthmag_vs_time.pdf','pdf')
-saveas(9,'asn_epicenters.pdf','pdf')
+saveas(3,'asn_epicenters.pdf','pdf')
