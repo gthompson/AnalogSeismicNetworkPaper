@@ -21,7 +21,7 @@ startRow = 2;
 %   column5: double (%f)
 %	column6: double (%f)
 % For more information, see the TEXTSCAN documentation.
-formatSpec = '%f%q%f%f%f%f%[^\n\r]';
+formatSpec = '%f%q%f%f%f%f%s%[^\n\r]';
 
 %% Open the text file.
 fileID = fopen(filename,'r');
@@ -42,23 +42,70 @@ fclose(fileID);
 % script.
 
 %% Create output variable
-tbl = table(dataArray{1:end-1}, 'VariableNames', {'index','otime','lat','lon','depth','mag'});
+tbl = table(dataArray{1:end-1}, 'VariableNames', {'index','otime','lat','lon','depth','mag','quality'});
 
 %% Clear temporary variables
 clearvars filename delimiter startRow formatSpec fileID dataArray ans;
 
 %% added by glenn
 close all
-cobj=Catalog(datenum(tbl.otime), tbl.lon, tbl.lat, tbl.depth, tbl.mag)
-cobj.plot_time()
-cobj.plot()
+cobj=Catalog(datenum(tbl.otime), tbl.lon, tbl.lat, tbl.depth, tbl.mag);
+
+
+%%
 open contourmap_ASN_sites.fig
 hold on
-j = jet(255);
-c=1+round(254*(cobj.otime - min(cobj.otime))/(max(cobj.otime)-min(cobj.otime)) )
-scatter(-cobj.lon, cobj.lat, 20*(cobj.mag+1.5), j(c,:))
+a1 = find(tbl.quality=='A1');
+b1 = find(tbl.quality=='B1');
+c1 = find(tbl.quality=='C1');
+cobja1=cobj.subset('indices',a1);
+cobjb1=cobj.subset('indices',b1);
+cobjc1=cobj.subset('indices',c1);
+symsize = get_symsize(cobj);
+c1symsize = get_symsize(cobjc1); 
+b1symsize = get_symsize(cobjb1); 
+a1symsize = get_symsize(cobja1); 
+
+% scatter(-cobj.lon, cobj.lat, 5*(cobj.mag+1.5),'k')
+% scatter(-cobj.lon(c1), cobj.lat(c1), 5*(cobj.mag(c1)+1.5),'r')
+% scatter(-cobj.lon(b1), cobj.lat(b1), 5*(cobj.mag(b1)+1.5),'y')
+% scatter(-cobj.lon(a1), cobj.lat(a1), 5*(cobj.mag(a1)+1.5),'g')
+sg1=scatter(-cobj.lon, cobj.lat, symsize,'k','DisplayName','D')
+sg2=scatter(-cobjc1.lon, cobjc1.lat, c1symsize,'r','DisplayName','C')
+sg3=scatter(-cobjb1.lon, cobjb1.lat, b1symsize,'y','DisplayName','B')
+sg4=scatter(-cobja1.lon, cobja1.lat, a1symsize,'g','DisplayName','A')
+hold off
+lgd=legend([sg4 sg3 sg2 sg1]);
+lgd.FontSize = 14;
+lgd.Title.String = 'Quality';
 saveas(gcf,'asn_epicenters.eps','epsc')
-saveas(3,'asn_depthmag_vs_time.eps','epsc')
-saveas(2,'asn_depthmag_vs_time.eps','epsc')
-saveas(2,'asn_depthmag_vs_time.pdf','pdf')
-saveas(3,'asn_epicenters.pdf','pdf')
+
+%%
+figure
+cobj.plot_time()
+cobja1=cobj.subset('indices',a1);
+cobjb1=cobj.subset('indices',b1);
+cobjc1=cobj.subset('indices',c1);
+c1symsize = get_symsize(cobjc1); 
+b1symsize = get_symsize(cobjb1); 
+a1symsize = get_symsize(cobja1); 
+
+subplot(2,1,1);
+hold on
+scatter(cobjc1.otime, cobjc1.depth, c1symsize, 'r');
+scatter(cobjb1.otime, cobjb1.depth, b1symsize, 'y');
+scatter(cobja1.otime, cobja1.depth, a1symsize, 'g');
+set(gca,'YLim',[-2 20])
+hold off
+
+subplot(2,1,2);
+hold on
+scatter(cobjc1.otime, cobjc1.mag, c1symsize, 'r');
+scatter(cobjb1.otime, cobjb1.mag, b1symsize, 'y');
+scatter(cobja1.otime, cobja1.mag, a1symsize, 'g');
+set(gca,'YLim',[-1.5 2.6])
+saveas(gcf,'asn_depthmag_vs_time.eps','epsc')
+
+%%
+cobj.bvalue()
+saveas(gcf,'asn_bvalues.eps','epsc')
