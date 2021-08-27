@@ -1,3 +1,9 @@
 *.log
 *.out
 
+.ipynb_checkpoints/MVO_ASN_PAPERv2-checkpoint.ipynb
+.ipynb_checkpoints/MVO_ASNE_PAPER-checkpoint.ipynb
+.ipynb_checkpoints/RT130_ontime-checkpoint.ipynb
+.ipynb_checkpoints/Untitled-checkpoint.ipynb
+MATLAB/.DS_Store
+Untitled.ipynb
